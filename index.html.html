@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>SnapMacros 🍟</title>
+
+<style>
+  :root {
+    --purple: #7c3aed;
+    --purple-light: #ede9fe;
+    --purple-mid: #a78bfa;
+    --pink: #ec4899;
+    --pink-light: #fce7f3;
+    --orange: #f97316;
+    --orange-light: #ffedd5;
+    --green: #10b981;
+    --green-light: #d1fae5;
+    --yellow: #f59e0b;
+    --yellow-light: #fef3c7;
+    --bg: #faf5ff;
+    --card: #ffffff;
+    --text: #1e1b4b;
+    --muted: #6b7280;
+    --border: #e9d5ff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    color: var(--text);
+    max-width: 420px;
+    margin: 0 auto;
+    padding-bottom: 80px;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+    padding: 20px 16px 24px;
+    border-radius: 0 0 28px 28px;
+    color: white;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute; top: -30px; right: -30px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+  }
+  .header::after {
+    content: '';
+    position: absolute; bottom: -20px; left: -20px;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+  }
+  .header-emoji { font-size: 40px; display: block; margin-bottom: 4px; animation: bounce 2s infinite; }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+  .header-title { font-family: -apple-system, 'Helvetica Neue', sans-serif; font-weight: 900; font-size: 28px; letter-spacing: 0.5px; }
+  .header-sub { font-size: 13px; opacity: 0.88; margin-top: 2px; font-weight: 600; }
+
+  /* DAILY SUMMARY */
+  .daily-bar {
+    margin: 16px 14px 0;
+    background: var(--card);
+    border-radius: 18px;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+  }
+  .daily-label {
+    font-size: 12px; font-weight: 700; color: var(--purple);
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+  }
+  .daily-macros { display: flex; gap: 8px; }
+  .daily-macro {
+    flex: 1; text-align: center;
+    background: var(--bg); border-radius: 12px; padding: 6px 4px;
+  }
+  .daily-macro .val { font-size: 16px; font-weight: 800; }
+  .daily-macro .lbl { font-size: 10px; font-weight: 600; color: var(--muted); }
+  .dm-kcal .val { color: #dc2626; }
+  .dm-prot .val { color: var(--green); }
+  .dm-carb .val { color: var(--yellow); }
+  .dm-fat .val { color: var(--pink); }
+
+  /* CAMERA AREA */
+  .section { padding: 14px 14px 0; }
+  .section-title {
+    font-size: 13px; font-weight: 800; color: var(--purple);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+  }
+
+  .cam-zone {
+    border: 2.5px dashed var(--purple-mid);
+    border-radius: 20px;
+    min-height: 200px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: var(--purple-light);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .cam-zone:active { transform: scale(0.98); }
+  .cam-zone.has-image { border-style: solid; }
+  #preview-img {
+    width: 100%; height: 200px; object-fit: cover;
+    border-radius: 18px; display: none;
+  }
+  .cam-placeholder { text-align: center; padding: 24px; }
+  .cam-placeholder .big-emoji { font-size: 48px; margin-bottom: 8px; display: block; }
+  .cam-placeholder p { font-size: 14px; font-weight: 700; color: var(--purple); }
+  .cam-placeholder span { font-size: 12px; color: var(--muted); font-weight: 600; }
+
+  input[type=file] { display: none; }
+
+  .btn-row { display: flex; gap: 8px; margin-top: 10px; }
+  .btn {
+    flex: 1; padding: 13px 10px;
+    border: none; border-radius: 14px;
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    font-size: 14px; font-weight: 800;
+    cursor: pointer; transition: all 0.18s;
+    display: flex; align-items: center;
+    justify-content: center; gap: 6px;
+  }
+  .btn:active { transform: scale(0.96); }
+  .btn-purple { background: var(--purple); color: white; }
+  .btn-pink { background: var(--pink); color: white; }
+  .btn-analyze {
+    width: 100%; margin-top: 10px;
+    background: linear-gradient(135deg, var(--purple) 0%, var(--pink) 100%);
+    color: white; padding: 15px;
+    border-radius: 16px; border: none;
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    font-size: 16px; font-weight: 800;
+    cursor: pointer; transition: all 0.2s;
+    display: none;
+  }
+  .btn-analyze:active { transform: scale(0.97); }
+  .btn-analyze.visible { display: block; }
+
+  /* LOADING */
+  .loading-box {
+    display: none;
+    background: var(--card);
+    border-radius: 18px;
+    padding: 24px;
+    text-align: center;
+    border: 1.5px solid var(--border);
+    margin-top: 10px;
+  }
+  .loading-box.visible { display: block; }
+  .loading-emoji { font-size: 36px; animation: spin 1s linear infinite; display: block; margin-bottom: 10px; }
+  @keyframes spin { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
+  .loading-text { font-size: 14px; font-weight: 700; color: var(--purple); }
+  .loading-sub { font-size: 12px; color: var(--muted); font-weight: 600; margin-top: 4px; }
+
+  /* RESULT CARD */
+  .result-card {
+    display: none;
+    background: var(--card);
+    border-radius: 20px;
+    padding: 16px;
+    border: 1.5px solid var(--border);
+    margin-top: 10px;
+    animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes popIn { from{opacity:0;transform:scale(0.9)} to{opacity:1;transform:scale(1)} }
+  .result-card.visible { display: block; }
+  .result-name {
+    font-size: 17px; font-weight: 800; color: var(--text);
+    margin-bottom: 4px; display: flex; align-items: center; gap: 8px;
+  }
+  .result-portion { font-size: 12px; color: var(--muted); font-weight: 600; margin-bottom: 12px; }
+  .macros-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
+  .macro-card {
+    border-radius: 14px; padding: 10px 12px;
+    display: flex; flex-direction: column;
+  }
+  .macro-card.kcal { background: #fee2e2; }
+  .macro-card.prot { background: var(--green-light); }
+  .macro-card.carbs { background: var(--yellow-light); }
+  .macro-card.fat { background: var(--pink-light); }
+  .macro-num { font-size: 24px; font-weight: 900; line-height: 1; }
+  .macro-card.kcal .macro-num { color: #dc2626; }
+  .macro-card.prot .macro-num { color: #059669; }
+  .macro-card.carbs .macro-num { color: #d97706; }
+  .macro-card.fat .macro-num { color: #db2777; }
+  .macro-name { font-size: 11px; font-weight: 700; margin-top: 3px; }
+  .macro-card.kcal .macro-name { color: #ef4444; }
+  .macro-card.prot .macro-name { color: var(--green); }
+  .macro-card.carbs .macro-name { color: var(--yellow); }
+  .macro-card.fat .macro-name { color: var(--pink); }
+  .result-note {
+    margin-top: 10px; padding-top: 10px;
+    border-top: 1.5px dashed var(--border);
+    font-size: 12px; font-weight: 600; color: var(--muted);
+    line-height: 1.5;
+  }
+  .result-note span { color: var(--purple); font-weight: 800; }
+  .btn-save {
+    width: 100%; margin-top: 10px;
+    background: var(--green); color: white;
+    padding: 12px; border-radius: 14px; border: none;
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    font-size: 14px; font-weight: 800;
+    cursor: pointer;
+  }
+
+  /* HISTORY */
+  .history-list { display: flex; flex-direction: column; gap: 8px; }
+  .history-item {
+    background: var(--card);
+    border-radius: 14px; padding: 10px 12px;
+    border: 1.5px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .h-emoji { font-size: 26px; }
+  .h-info { flex: 1; }
+  .h-name { font-size: 13px; font-weight: 800; color: var(--text); }
+  .h-time { font-size: 11px; color: var(--muted); font-weight: 600; }
+  .h-kcal {
+    background: #fee2e2; color: #dc2626;
+    font-size: 13px; font-weight: 800;
+    padding: 4px 10px; border-radius: 20px;
+  }
+
+  /* KEY NOTICE */
+  .api-notice {
+    background: var(--yellow-light);
+    border: 1.5px solid #fcd34d;
+    border-radius: 14px; padding: 12px 14px;
+    margin: 14px 14px 0;
+    font-size: 12px; font-weight: 600; color: #92400e;
+    line-height: 1.5;
+  }
+  .api-notice strong { color: #78350f; }
+  .api-key-input {
+    width: 100%; margin-top: 8px;
+    padding: 10px 12px;
+    border: 1.5px solid #fcd34d;
+    border-radius: 10px;
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    font-size: 13px; font-weight: 600;
+    background: white; color: var(--text);
+    outline: none;
+  }
+  .api-key-input:focus { border-color: var(--purple); }
+  .btn-save-key {
+    margin-top: 6px; width: 100%;
+    background: var(--yellow); color: white;
+    padding: 9px; border-radius: 10px; border: none;
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    font-size: 13px; font-weight: 800; cursor: pointer;
+  }
+  .key-ok {
+    display: none;
+    margin-top: 6px;
+    font-size: 12px; font-weight: 700; color: var(--green);
+    text-align: center;
+  }
+  .key-ok.visible { display: block; }
+
+  /* NAVBAR */
+  .navbar {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 420px;
+    background: white;
+    border-top: 1.5px solid var(--border);
+    display: flex; padding: 8px 0 12px;
+    z-index: 100;
+  }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; gap: 2px;
+    font-size: 10px; font-weight: 800;
+    color: var(--muted); cursor: pointer;
+  }
+  .nav-item.active { color: var(--purple); }
+  .nav-icon { font-size: 22px; }
+
+  .tab { display: none; }
+  .tab.active { display: block; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="header-emoji">🍟</span>
+  <div class="header-title">SnapMacros</div>
+  <div class="header-sub">Saca la foto · La IA calcula todo</div>
+</div>
+
+<!-- API KEY NOTICE -->
+<div class="api-notice" id="api-notice">
+  <strong>⚡ Paso 1 — Tu API Key de Anthropic</strong><br>
+  Necesitas una key gratis en <strong>console.anthropic.com</strong> para que la IA analice tus fotos.
+  <input class="api-key-input" id="api-key-input" type="password" placeholder="sk-ant-api03-..." />
+  <button class="btn-save-key" onclick="saveKey()">Guardar key 🔑</button>
+  <div class="key-ok" id="key-ok">✅ Key guardada — ¡a escanear snacks!</div>
+</div>
+
+<!-- TABS -->
+<div class="tab active" id="tab-scan">
+  <!-- DAILY SUMMARY -->
+  <div class="daily-bar">
+    <div class="daily-label">📊 Total de hoy</div>
+    <div class="daily-macros">
+      <div class="daily-macro dm-kcal">
+        <div class="val" id="total-kcal">0</div>
+        <div class="lbl">kcal</div>
+      </div>
+      <div class="daily-macro dm-prot">
+        <div class="val" id="total-prot">0g</div>
+        <div class="lbl">prot</div>
+      </div>
+      <div class="daily-macro dm-carb">
+        <div class="val" id="total-carb">0g</div>
+        <div class="lbl">carbos</div>
+      </div>
+      <div class="daily-macro dm-fat">
+        <div class="val" id="total-fat">0g</div>
+        <div class="lbl">grasas</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📸 Escanea tu snack</div>
+    <div class="cam-zone" id="cam-zone" onclick="document.getElementById('file-input').click()">
+      <img id="preview-img" alt="preview" />
+      <div class="cam-placeholder" id="cam-placeholder">
+        <span class="big-emoji">🤳</span>
+        <p>Toca para agregar foto</p>
+        <span>Funciona con fotos de galería</span>
+      </div>
+    </div>
+    <input type="file" id="file-input" accept="image/*" onchange="handleFile(this)" />
+
+    <div class="btn-row">
+      <button class="btn btn-purple" onclick="document.getElementById('file-input').click()">
+        📷 Galería
+      </button>
+      <button class="btn btn-pink" onclick="openCamera()">
+        🤳 Cámara
+      </button>
+    </div>
+    <input type="file" id="camera-input" accept="image/*" capture="environment" onchange="handleFile(this)" style="display:none" />
+
+    <button class="btn-analyze" id="btn-analyze" onclick="analyzeImage()">
+      ✨ Analizar macros
+    </button>
+
+    <div class="loading-box" id="loading-box">
+      <span class="loading-emoji">🔍</span>
+      <div class="loading-text">La IA está analizando tu snack...</div>
+      <div class="loading-sub">Identificando alimento y calculando macros</div>
+    </div>
+
+    <div class="result-card" id="result-card">
+      <div class="result-name" id="result-name">🍫 Nombre del snack</div>
+      <div class="result-portion" id="result-portion">Porción estimada: 100g</div>
+      <div class="macros-grid">
+        <div class="macro-card kcal">
+          <span class="macro-num" id="r-kcal">0</span>
+          <span class="macro-name">CALORÍAS</span>
+        </div>
+        <div class="macro-card prot">
+          <span class="macro-num" id="r-prot">0g</span>
+          <span class="macro-name">PROTEÍNA</span>
+        </div>
+        <div class="macro-card carbs">
+          <span class="macro-num" id="r-carbs">0g</span>
+          <span class="macro-name">CARBOS</span>
+        </div>
+        <div class="macro-card fat">
+          <span class="macro-num" id="r-fat">0g</span>
+          <span class="macro-name">GRASAS</span>
+        </div>
+      </div>
+      <div class="result-note" id="result-note"></div>
+      <button class="btn-save" onclick="saveToHistory()">💾 Guardar en historial</button>
+    </div>
+  </div>
+</div>
+
+<div class="tab" id="tab-history">
+  <div class="daily-bar" style="margin-top:16px">
+    <div class="daily-label">📊 Total de hoy</div>
+    <div class="daily-macros">
+      <div class="daily-macro dm-kcal">
+        <div class="val" id="total-kcal2">0</div>
+        <div class="lbl">kcal</div>
+      </div>
+      <div class="daily-macro dm-prot">
+        <div class="val" id="total-prot2">0g</div>
+        <div class="lbl">prot</div>
+      </div>
+      <div class="daily-macro dm-carb">
+        <div class="val" id="total-carb2">0g</div>
+        <div class="lbl">carbos</div>
+      </div>
+      <div class="daily-macro dm-fat">
+        <div class="val" id="total-fat2">0g</div>
+        <div class="lbl">grasas</div>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">📋 Historial de hoy</div>
+    <div class="history-list" id="history-list">
+      <div style="text-align:center; padding:30px; color:var(--muted); font-weight:700; font-size:14px;">
+        Aún no hay snacks registrados 😅<br>
+        <span style="font-size:12px">¡Escanea tu primer snack!</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="navbar">
+  <div class="nav-item active" id="nav-scan" onclick="switchTab('scan')">
+    <span class="nav-icon">📸</span>
+    Escanear
+  </div>
+  <div class="nav-item" id="nav-history" onclick="switchTab('history')">
+    <span class="nav-icon">📋</span>
+    Historial
+  </div>
+</nav>
+
+<script>
+let currentImageBase64 = null;
+let currentResult = null;
+let history = JSON.parse(localStorage.getItem('snapmacros_history') || '[]');
+let totals = { kcal: 0, prot: 0, carbs: 0, fat: 0 };
+
+function saveKey() {
+  const k = document.getElementById('api-key-input').value.trim();
+  if (!k || !k.startsWith('sk-')) {
+    alert('Ingresa una API key válida (empieza con sk-)');
+    return;
+  }
+  localStorage.setItem('snapmacros_key', k);
+  document.getElementById('key-ok').classList.add('visible');
+  document.getElementById('api-notice').style.borderColor = '#6ee7b7';
+}
+
+function getKey() {
+  return localStorage.getItem('snapmacros_key') || document.getElementById('api-key-input').value.trim();
+}
+
+window.onload = () => {
+  const saved = localStorage.getItem('snapmacros_key');
+  if (saved) {
+    document.getElementById('api-key-input').value = saved;
+    document.getElementById('key-ok').classList.add('visible');
+  }
+  recalcTotals();
+  renderHistory();
+};
+
+function handleFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const base64full = e.target.result;
+    currentImageBase64 = base64full.split(',')[1];
+    const img = document.getElementById('preview-img');
+    img.src = base64full;
+    img.style.display = 'block';
+    document.getElementById('cam-placeholder').style.display = 'none';
+    document.getElementById('cam-zone').classList.add('has-image');
+    document.getElementById('btn-analyze').classList.add('visible');
+    document.getElementById('result-card').classList.remove('visible');
+    document.getElementById('loading-box').classList.remove('visible');
+  };
+  reader.readAsDataURL(file);
+}
+
+function openCamera() {
+  document.getElementById('camera-input').click();
+}
+
+async function analyzeImage() {
+  const key = getKey();
+  if (!key) {
+    alert('Primero guarda tu API key de Anthropic');
+    return;
+  }
+  if (!currentImageBase64) {
+    alert('Primero selecciona una foto');
+    return;
+  }
+
+  document.getElementById('loading-box').classList.add('visible');
+  document.getElementById('result-card').classList.remove('visible');
+  document.getElementById('btn-analyze').classList.remove('visible');
+
+  const prompt = `Analiza esta imagen de comida/snack y proporciona los macronutrientes estimados.
+Responde SOLO en este formato JSON exacto, sin texto adicional:
+{
+  "nombre": "nombre del alimento con emoji al inicio",
+  "porcion": "porción estimada (ej: 1 unidad / 100g / 1 vaso)",
+  "kcal": número,
+  "proteina": número en gramos,
+  "carbos": número en gramos,
+  "grasas": número en gramos,
+  "nota": "observación breve sobre el alimento (máx 60 chars)"
+}
+Si no puedes identificar comida en la imagen, responde: {"error": "No se detectó alimento"}`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-opus-4-6',
+        max_tokens: 400,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: currentImageBase64 } },
+            { type: 'text', text: prompt }
+          ]
+        }]
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error?.message || 'Error de API');
+    }
+
+    const rawText = data.content[0].text.trim();
+    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('Respuesta inesperada');
+
+    const result = JSON.parse(jsonMatch[0]);
+
+    if (result.error) {
+      alert('No se detectó comida en la imagen. Intenta con otra foto.');
+      document.getElementById('loading-box').classList.remove('visible');
+      document.getElementById('btn-analyze').classList.add('visible');
+      return;
+    }
+
+    currentResult = result;
+    showResult(result);
+
+  } catch (err) {
+    document.getElementById('loading-box').classList.remove('visible');
+    document.getElementById('btn-analyze').classList.add('visible');
+    alert('Error: ' + err.message);
+  }
+}
+
+function showResult(r) {
+  document.getElementById('loading-box').classList.remove('visible');
+  document.getElementById('result-name').textContent = r.nombre;
+  document.getElementById('result-portion').textContent = 'Porción estimada: ' + r.porcion;
+  document.getElementById('r-kcal').textContent = Math.round(r.kcal);
+  document.getElementById('r-prot').textContent = Math.round(r.proteina) + 'g';
+  document.getElementById('r-carbs').textContent = Math.round(r.carbos) + 'g';
+  document.getElementById('r-fat').textContent = Math.round(r.grasas) + 'g';
+  document.getElementById('result-note').innerHTML = r.nota ? `💡 <span>${r.nota}</span>` : '';
+  document.getElementById('result-card').classList.add('visible');
+}
+
+function saveToHistory() {
+  if (!currentResult) return;
+  const now = new Date();
+  const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  const entry = { ...currentResult, time: timeStr, id: Date.now() };
+  history.unshift(entry);
+  localStorage.setItem('snapmacros_history', JSON.stringify(history));
+  recalcTotals();
+  renderHistory();
+  document.getElementById('result-card').classList.remove('visible');
+  document.getElementById('preview-img').style.display = 'none';
+  document.getElementById('cam-placeholder').style.display = 'block';
+  document.getElementById('btn-analyze').classList.remove('visible');
+  currentImageBase64 = null;
+  currentResult = null;
+  alert('✅ Guardado en tu historial!');
+}
+
+function recalcTotals() {
+  const today = new Date().toDateString();
+  const todayItems = history.filter(h => {
+    const d = new Date(h.id);
+    return d.toDateString() === today;
+  });
+  totals = todayItems.reduce((acc, h) => ({
+    kcal: acc.kcal + (h.kcal || 0),
+    prot: acc.prot + (h.proteina || 0),
+    carbs: acc.carbs + (h.carbos || 0),
+    fat: acc.fat + (h.grasas || 0)
+  }), { kcal: 0, prot: 0, carbs: 0, fat: 0 });
+
+  ['', '2'].forEach(s => {
+    const el = (id) => document.getElementById(id + s);
+    if (el('total-kcal')) el('total-kcal').textContent = Math.round(totals.kcal);
+    if (el('total-prot')) el('total-prot').textContent = Math.round(totals.prot) + 'g';
+    if (el('total-carb')) el('total-carb').textContent = Math.round(totals.carbs) + 'g';
+    if (el('total-fat')) el('total-fat').textContent = Math.round(totals.fat) + 'g';
+  });
+}
+
+function renderHistory() {
+  const container = document.getElementById('history-list');
+  const today = new Date().toDateString();
+  const todayItems = history.filter(h => new Date(h.id).toDateString() === today);
+
+  if (todayItems.length === 0) {
+    container.innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted);font-weight:700;font-size:14px;">
+      Aún no hay snacks registrados 😅<br><span style="font-size:12px">¡Escanea tu primer snack!</span></div>`;
+    return;
+  }
+
+  container.innerHTML = todayItems.map(h => `
+    <div class="history-item">
+      <span class="h-emoji">${getEmoji(h.nombre)}</span>
+      <div class="h-info">
+        <div class="h-name">${h.nombre}</div>
+        <div class="h-time">${h.time} · ${h.porcion}</div>
+      </div>
+      <div class="h-kcal">${Math.round(h.kcal)} kcal</div>
+    </div>
+  `).join('');
+}
+
+function getEmoji(nombre) {
+  const emojis = ['🍕','🍔','🍟','🌮','🍫','🍰','🧁','🍩','🍪','🥤','🧃','🍎','🥑','🍌','🥐','🍞','🧀','🥚','🍗','🥩'];
+  return nombre.match(/[\u{1F300}-\u{1FAFF}]/u)?.[0] || emojis[Math.floor(Math.random() * emojis.length)];
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('nav-' + tab).classList.add('active');
+  recalcTotals();
+  if (tab === 'history') renderHistory();
+}
+</script>
+</body>
+</html>
